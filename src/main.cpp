@@ -16,8 +16,8 @@ using std::vector;
 
 int lane = 1;
 double ref_vel = 0.0;
-double safe_dist = 30.0;
-double target_spacing = 30.0;
+double safe_dist = 20.0;
+double target_spacing = 40.0;
 int path_size = 50;
 
 int main() {
