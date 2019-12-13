@@ -113,6 +113,14 @@ int main() {
           int id_car_ahead = -1;
           double speed_car_ahead = 0;
 
+          // Defining variables for finding number of cars in each lane 100m ahead of us and for finding average speed
+          vector<double> car_speeds_lane0;
+          vector<double> car_speeds_lane1;
+          vector<double> car_speeds_lane2;
+          
+          double avg_speed_lane0, avg_speed_lane1, avg_speed_lane2;
+          int num_cars_lane0, num_cars_lane1, num_cars_lane2;
+
           // Use sensor fusion to find reference velocity to move at by looping through all the cars on the road
           // sensor_fusion vector [ id, x, y, vx, vy, s, d]
           for(int i = 0; i < sensor_fusion.size(); i++){
@@ -133,7 +141,21 @@ int main() {
             if(lane_other_car < 0 || lane_other_car > 2){
               continue;
             }
-          
+
+            // Getting information about average lane speed and number of cars on each lane
+            // only interested in cars ahead of us within a distance of 100 meters
+            if(check_car_s > car_s && dist2othercar > 0 && dist2othercar <= 100){
+              if(lane_other_car == 0){
+                car_speeds_lane0.push_back(check_speed);  // left lane
+              }
+              else if(lane_other_car == 1){
+                car_speeds_lane1.push_back(check_speed);  // middle lane
+              }
+              else if(lane_other_car == 2){
+                car_speeds_lane2.push_back(check_speed);  // right lane
+              }
+            }
+
             // setting flags
             if(lane == lane_other_car){  // if car is in same lane
               car_ahead |= check_car_s > car_s && check_car_s - car_s < safe_dist;
@@ -143,6 +165,7 @@ int main() {
                 speed_car_ahead = check_speed; //m/sec to mph
                 dist_car_ahead = dist2othercar;
               }
+              // Getting information about average lane speed
             }
             else if(lane-lane_other_car == 1){  // if car is on the left lane of us
               car_left |= car_s - safe_dist < check_car_s && car_s + safe_dist > check_car_s;
@@ -151,6 +174,27 @@ int main() {
               car_right |= car_s - safe_dist < check_car_s && car_s + safe_dist > check_car_s;
             }
           }
+
+          // Calculating average lane speeds
+          avg_speed_lane0 = accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size(); 
+          avg_speed_lane1 = accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size(); 
+          avg_speed_lane2 = accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size();
+
+          // Find number of cars on each lane 
+          num_cars_lane0 = car_speeds_lane0.size();
+          num_cars_lane1 = car_speeds_lane1.size();
+          num_cars_lane2 = car_speeds_lane1.size();
+
+          // DEBUGGING
+          std::cout << "  LEFT LANE  " << std::setw(2)
+                    << "  avg Speed = " << std::setw(2) << avg_speed_lane0
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane0 << std::endl;
+          std::cout << "  MIDDLE LANE  " << std::setw(2)
+                    << "  avg Speed = " << std::setw(2) << avg_speed_lane1
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane1 << std::endl;
+          std::cout << "  RIGHT LANE  " << std::setw(2)
+                    << "  avg Speed = " << std::setw(2) << avg_speed_lane2
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane2 << std::endl;
 
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
@@ -165,10 +209,7 @@ int main() {
               // Very simple speed controller; decelerate only by what is needed in order to keep the speed of the car in front
               double diff_speed_mps = ((target_speed/2.24) - speed_car_ahead);
               double decel_mphps = diff_speed_mps*2.24*0.02;
-              // might consider disabling this for collision avoidance
-              // if(decel_mphps > 0.224){
-              //   decel_mphps = 0.224;
-              // }
+              // might consider adding a limit for decel_mphps for avoiding max jerk/acceleration violations
               speed_diff -= decel_mphps;
               // alternative:
               // simple pid speed controller
