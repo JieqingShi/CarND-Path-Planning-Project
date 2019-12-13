@@ -118,8 +118,11 @@ int main() {
           vector<double> car_speeds_lane1;
           vector<double> car_speeds_lane2;
           
-          double avg_speed_lane0, avg_speed_lane1, avg_speed_lane2;
-          int num_cars_lane0, num_cars_lane1, num_cars_lane2;
+          vector<double> avg_speeds_lane;
+          vector<int> num_cars_lane;
+
+          // double avg_speed_lane0, avg_speed_lane1, avg_speed_lane2;
+          // int num_cars_lane0, num_cars_lane1, num_cars_lane2;
 
           // Use sensor fusion to find reference velocity to move at by looping through all the cars on the road
           // sensor_fusion vector [ id, x, y, vx, vy, s, d]
@@ -176,25 +179,33 @@ int main() {
           }
 
           // Calculating average lane speeds
-          avg_speed_lane0 = accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size(); 
-          avg_speed_lane1 = accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size(); 
-          avg_speed_lane2 = accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size();
+          // avg_speed_lane0 = accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size(); 
+          // avg_speed_lane1 = accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size(); 
+          // avg_speed_lane2 = accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size();
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size());
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size());
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size());
 
           // Find number of cars on each lane 
-          num_cars_lane0 = car_speeds_lane0.size();
-          num_cars_lane1 = car_speeds_lane1.size();
-          num_cars_lane2 = car_speeds_lane1.size();
+          // num_cars_lane0 = car_speeds_lane0.size();
+          // num_cars_lane1 = car_speeds_lane1.size();
+          // num_cars_lane2 = car_speeds_lane2.size();
+          num_cars_lane.push_back(car_speeds_lane0.size());
+          num_cars_lane.push_back(car_speeds_lane1.size());
+          num_cars_lane.push_back(car_speeds_lane2.size());
+
+
 
           // DEBUGGING
           std::cout << "  LEFT LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speed_lane0
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane0 << std::endl;
+                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[0]
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane[0] << std::endl;
           std::cout << "  MIDDLE LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speed_lane1
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane1 << std::endl;
+                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[1]
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane[1] << std::endl;
           std::cout << "  RIGHT LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speed_lane2
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane2 << std::endl;
+                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[2]
+                    << "  no. of cars = " << std::setw(2) << num_cars_lane[2] << std::endl;
 
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
