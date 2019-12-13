@@ -16,8 +16,8 @@ using std::vector;
 
 int lane = 1;
 double target_speed = 0.0;
-double safe_dist = 20.0;
-double target_spacing = 40.0;
+double safe_dist = 25.0;
+double target_spacing = 35.0;
 int path_size = 50;
 
 int main() {
@@ -162,18 +162,16 @@ int main() {
               lane++;
             }
             else {
+              // Very simple speed controller; decelerate only by what is needed in order to keep the speed of the car in front
               double diff_speed_mps = ((target_speed/2.24) - speed_car_ahead);
               double decel_mphps = diff_speed_mps*2.24*0.02;
-              if(decel_mphps > 0.224){
-                decel_mphps = 0.224;
-              }
-              std::cout<<"Speed difference in meters/sec = " << diff_speed_mps << "; need to slow down by " << decel_mphps << std::endl;
-              // speed_diff -= 0.224;  // slow down
+              // might consider disabling this for collision avoidance
+              // if(decel_mphps > 0.224){
+              //   decel_mphps = 0.224;
+              // }
               speed_diff -= decel_mphps;
-              // three alternatives
+              // alternative:
               // simple pid speed controller
-              // use target and and fmin
-              // calc acceleration required to get to speed in front of us and limit max decel
             }
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
@@ -191,8 +189,6 @@ int main() {
               speed_diff += 0.224;
             }
           }
-
-          std::cout<<"Speed diff = "<<speed_diff<<std::endl;
           
           json msgJson;
 
@@ -225,9 +221,6 @@ int main() {
             ptsy.push_back(prev_car_y);
             ptsy.push_back(car_y);
 
-            // add reference speed
-            // ref_speed = car_speed;
-
           }
 
           // if we can build upon previous path
@@ -245,8 +238,6 @@ int main() {
 
             ptsy.push_back(prev_ref_y);
             ptsy.push_back(ref_y);
-
-            // ref_speed = distance(prev_ref_x, prev_ref_y, ref_x, ref_y) / 0.02;  // in m/sec
           }
 
           // create evenly spaced points e.g. 30m apart starting from the reference points (can be defined using variable int apart = 30)
