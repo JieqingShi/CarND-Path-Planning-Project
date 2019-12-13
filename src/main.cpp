@@ -174,7 +174,7 @@ int main() {
               if((lane == 0 && !car_right)){
                 lane = 1; // Back to center.
               }
-              if((lane==1 && !car_right)){
+              else if((lane==1 && !car_right)){
                 lane = 2;  // Back to right
               }
             }
