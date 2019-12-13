@@ -105,7 +105,7 @@ int main() {
             car_s = end_path_s;
           }
 
-          bool too_close = false;
+          bool car_ahead = false;
           bool car_left = false;
           bool car_right = false;
           double dist_left = 0.0;
@@ -124,7 +124,7 @@ int main() {
             check_car_s += (double)prev_size * 0.02 * check_speed; // prediction: projecting the cars position into the future by using previous points
             
             double dist2othercar = check_car_s - car_s;
-            int lane_other_car;
+            int lane_other_car = -1;
             // find lanes of other cars
             if(d>0 && d<=4){
               lane_other_car = 0;  // left lane
@@ -136,11 +136,13 @@ int main() {
               lane_other_car = 2;  // right lane
             }
             // todo: add check for lane_other_car < 0 if initialized to -1
-          
+            if(lane_other_car < 0){
+              continue;
+            }
           
           // setting flags
           if(lane == lane_other_car){  // if car is in same lane
-            too_close = too_close | (check_car_s > car_s && dist2othercar < safe_dist_front);
+            car_ahead = car_ahead | (check_car_s > car_s && dist2othercar < safe_dist_front);
           }
           else if(lane-lane_other_car == 1){  // if car is on the left lane of us
             car_left = car_left | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
@@ -152,7 +154,7 @@ int main() {
 
           // take actions
           double speed_diff = 0;
-          if(too_close){
+          if(car_ahead){
             if(!car_left && lane > 0){  //no car on left lane and we are on middle lane or right lane
               --lane;
             }
@@ -225,7 +227,7 @@ int main() {
           }
 
           // create evenly spaced points e.g. 30m apart starting from the reference points (can be defined using variable int apart = 30)
-          vector<double> next_wp0 = getXY(car_s+target_spacing, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp0 = getXY(car_s+target_spacing*1, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
           vector<double> next_wp1 = getXY(car_s+target_spacing*2, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
           vector<double> next_wp2 = getXY(car_s+target_spacing*3, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
