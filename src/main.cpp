@@ -124,21 +124,24 @@ int main() {
             check_car_s += (double)prev_size * 0.02 * check_speed; // prediction: projecting the cars position into the future by using previous points
             
             double dist2othercar = check_car_s - car_s;
-            int lane_other_car = -1;
-            // find lanes of other cars
-            if(d>0 && d<4){
-              lane_other_car = 0;  // left lane
+            if(d>0 && d<12){
+              int lane_other_car = d/4;  // we don't care about the lanes of the other cars
             }
-            else if(d>4 && d<8){
-              lane_other_car = 1;  // middle lane
-            }
-            else if(d>8 && d<12){
-              lane_other_car = 2;  // right lane
-            }
-            // todo: add check for lane_other_car < 0 if initialized to -1
-            if(lane_other_car < 0){
-              continue;
-            }
+            // int lane_other_car = -1;
+            // // find lanes of other cars
+            // if(d>0 && d<4){
+            //   lane_other_car = 0;  // left lane
+            // }
+            // else if(d>4 && d<8){
+            //   lane_other_car = 1;  // middle lane
+            // }
+            // else if(d>8 && d<12){
+            //   lane_other_car = 2;  // right lane
+            // }
+            // // todo: add check for lane_other_car < 0 if initialized to -1
+            // if(lane_other_car < 0){
+            //   continue;
+            // }
           
           // setting flags
           if(lane == lane_other_car){  // if car is in same lane
