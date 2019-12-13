@@ -16,8 +16,7 @@ using std::vector;
 
 int lane = 1;
 double ref_vel = 0.0;
-double safe_dist_front = 30.0;
-double safe_dist_back = -30.0;
+double safe_dist = 30.0;
 double target_spacing = 30.0;
 int path_size = 50;
 
@@ -108,12 +107,17 @@ int main() {
           bool car_ahead = false;
           bool car_left = false;
           bool car_right = false;
-          double dist_left = 0.0;
-          double dist_right = 0.0;
+
+          // Defining variables for finding information about the car directly ahead on the same lane
+          double dist_car_ahead = 10000;
+          int id_car_ahead = -1;
+          double speed_car_ahead = 0;
+
           // Use sensor fusion to find reference velocity to move at by looping through all the cars on the road
           // sensor_fusion vector [ id, x, y, vx, vy, s, d]
           for(int i = 0; i < sensor_fusion.size(); i++){
             // find out if another car is in the same lane as our ego car
+            int car_id = sensor_fusion[i][0];
             float d = sensor_fusion[i][6];
             double vx = sensor_fusion[i][3];
             double vy = sensor_fusion[i][4];
@@ -125,39 +129,28 @@ int main() {
             
             double dist2othercar = check_car_s - car_s;
             int lane_other_car = d/4; 
+            // todo: check if this is needed
             if(lane_other_car < 0 || lane_other_car > 2){
               continue;
             }
-            // int lane_other_car = -1;
-            // // find lanes of other cars
-            // if(d>0 && d<4){
-            //   lane_other_car = 0;  // left lane
-            // }
-            // else if(d>4 && d<8){
-            //   lane_other_car = 1;  // middle lane
-            // }
-            // else if(d>8 && d<12){
-            //   lane_other_car = 2;  // right lane
-            // }
-            // // todo: add check for lane_other_car < 0 if initialized to -1
-            // if(lane_other_car < 0){
-            //   continue;
-            // }
           
-          // setting flags
-          if(lane == lane_other_car){  // if car is in same lane
-            // car_ahead = car_ahead | (check_car_s > car_s && dist2othercar < safe_dist_front);
-            car_ahead |= check_car_s > car_s && check_car_s - car_s < safe_dist_front;
+            // setting flags
+            if(lane == lane_other_car){  // if car is in same lane
+              car_ahead |= check_car_s > car_s && check_car_s - car_s < safe_dist;
+              // Getting information about car in front of us
+              if(check_car_s > car_s && dist2othercar > 0){
+                id_car_ahead = car_id;
+                speed_car_ahead = check_speed * 2.24; //m/sec to mph
+                dist_car_ahead = dist2othercar;
+              }
+            }
+            else if(lane-lane_other_car == 1){  // if car is on the left lane of us
+              car_left |= car_s - safe_dist < check_car_s && car_s + safe_dist > check_car_s;
+            }
+            else if(lane-lane_other_car == -1){ // if car is on the right lane of us
+              car_right |= car_s - safe_dist < check_car_s && car_s + safe_dist > check_car_s;
+            }
           }
-          else if(lane-lane_other_car == 1){  // if car is on the left lane of us
-            // car_left = car_left | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
-            car_left |= car_s - safe_dist_front < check_car_s && car_s + safe_dist_front > check_car_s;
-          }
-          else if(lane-lane_other_car == -1){ // if car is on the right lane of us
-            // car_right = car_right | (dist2othercar < safe_dist_front && dist2othercar < safe_dist_back);
-            car_right |= car_s - safe_dist_front < check_car_s && car_s + safe_dist_front > check_car_s;
-          }
-        }
 
           // take actions
           double speed_diff = 0;
@@ -171,10 +164,12 @@ int main() {
             else {
               speed_diff -= 0.224;  // slow down
             }
+            std::cout<<"Speed of our car is "<< car_speed <<", the reference vel = "<< ref_vel <<", speed of car ahead with id ";
+            std::cout<< id_car_ahead <<" = "<<speed_car_ahead<<"and distance to that car = "<<dist_car_ahead<<std::endl;
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
-            // maybe can be simplified as well?
+            // todo: maybe can be simplified as well?
             if(lane != 2){ // if we are not on the center lane.
               if((lane == 0 && !car_right)){
                 lane = 1; // Back to center.
