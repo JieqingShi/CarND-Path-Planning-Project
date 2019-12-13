@@ -184,17 +184,17 @@ int main() {
           num_cars_lane.push_back(car_speeds_lane1.size());
           num_cars_lane.push_back(car_speeds_lane2.size());
 
-           // Calculating average lane speeds (first push the actual average)
-           avg_speeds_lane.push_back(accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/num_cars_lane[0]);
-           avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/num_cars_lane[1]);
-           avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/num_cars_lane[2]);
+          // Calculating average lane speeds (first push the actual average)
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/num_cars_lane[0]);
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/num_cars_lane[1]);
+          avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/num_cars_lane[2]);
            
-           // ... if number of cars for that lane is 0, change value to default speed 1000
-           for(int i = 0; i<avg_speeds_lane.size(); i++){
-             if(num_cars_lane[i]==0){
-               avg_speeds_lane[i] = 1000;
-             }
-           }
+          // ... if number of cars for that lane is 0, change value to default speed 1000
+          for(int i = 0; i<avg_speeds_lane.size(); i++){
+            if(num_cars_lane[i]==0){
+              avg_speeds_lane[i] = 50;
+            }
+          }
 
           // DEBUGGING
           // std::cout << "  LEFT LANE  " << std::setw(2)
@@ -209,6 +209,7 @@ int main() {
 
           int lane_least_cars = std::distance(num_cars_lane.begin(), std::min_element(num_cars_lane.begin(), num_cars_lane.end()));
           int lane_highest_avgspeed = std::distance(avg_speeds_lane.begin(), std::max_element(avg_speeds_lane.begin(), avg_speeds_lane.end()));
+          int target_lane = lane_highest_avgspeed;
 
           std::cout << " LANE WITH LEAST NO OF CARS  = " << std::setw(2)
                     << lane_least_cars << std::setw(2) << " WITH NO. CARS = " << num_cars_lane[lane_least_cars] << std::endl;
@@ -229,21 +230,32 @@ int main() {
               double diff_speed_mps = ((target_speed/2.24) - speed_car_ahead);
               double decel_mphps = diff_speed_mps*2.24*0.02;
               // might consider adding a limit for decel_mphps for avoiding max jerk/acceleration violations
+              // to prevent sudden acceleration if speed difference becomes negative
+              if(decel_mphps < 0){
+                decel_mphps = 0.056;
+              }
+              // set max deceleration to prevent violations of jerk/acceleration
+              else if(decel_mphps > 0.4){
+                decel_mphps = 0.4;
+              }
               speed_diff -= decel_mphps;
-              // alternative:
-              // simple pid speed controller
             }
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
             // todo: maybe can be simplified as well?
-            if(lane != 2){ // if we are not on the center lane.
-              if((lane == 0 && !car_right)){
-                lane = 1; // Back to center.
-              }
-              else if((lane==1 && !car_right)){
-                lane = 2;  // Back to right
-              }
+            // if(lane != 2){ // if we are not on the center lane.
+            //   if((lane == 0 && !car_right)){
+            //     lane = 1; // Back to center.
+            //   }
+            //   else if((lane==1 && !car_right)){
+            //     lane = 2;  // Back to right
+            //   }
+            // }
+
+            // set very simple target_lane based on highest avg_sped for first testing
+            if(lane!=target_lane && !car_right && !car_left){
+              lane = target_lane;
             }
             if(target_speed < 49.5){
               speed_diff += 0.224;
