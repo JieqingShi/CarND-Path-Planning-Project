@@ -124,8 +124,9 @@ int main() {
             check_car_s += (double)prev_size * 0.02 * check_speed; // prediction: projecting the cars position into the future by using previous points
             
             double dist2othercar = check_car_s - car_s;
-            if(d>0 && d<12){
-              int lane_other_car = d/4;  // we don't care about the lanes of the other cars
+            int lane_other_car = d/4; 
+            if(lane_other_car < 0 || lane_other_car > 2){
+              continue;
             }
             // int lane_other_car = -1;
             // // find lanes of other cars
