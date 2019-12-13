@@ -106,8 +106,8 @@ int main() {
           }
 
           bool too_close = false;
-          bool no_lcl = false;
-          bool no_lcr = false;
+          bool car_left = false;
+          bool car_right = false;
           double dist_left = 0.0;
           double dist_right = 0.0;
           // Use sensor fusion to find reference velocity to move at by looping through all the cars on the road
@@ -143,20 +143,20 @@ int main() {
             too_close = too_close | (check_car_s > car_s && dist2othercar < safe_dist_front);
           }
           else if(lane-lane_other_car == 1){  // if car is on the left lane of us
-            no_lcl = no_lcl | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
+            car_left = car_left | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
           }
           else if(lane-lane_other_car == -1){ // if car is on the right lane of us
-            no_lcr = no_lcr | (dist2othercar < safe_dist_front && dist2othercar < safe_dist_back);
+            car_right = car_right | (dist2othercar < safe_dist_front && dist2othercar < safe_dist_back);
           }
         }
 
           // take actions
           double speed_diff = 0;
           if(too_close){
-            if(!no_lcl && lane > 0){  //no car on left lane and we are on middle lane or right lane
+            if(!car_left && lane > 0){  //no car on left lane and we are on middle lane or right lane
               --lane;
             }
-            else if(!no_lcr && lane!=2){  //no car on right lane and we are on middle lane or left lane
+            else if(!car_right && lane!=2){  //no car on right lane and we are on middle lane or left lane
               ++lane;
             }
             else {
@@ -165,11 +165,10 @@ int main() {
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
-            if(lane==0 && !no_lcr){  // if on left lane, go back to middle lane
-              lane = 1; 
-            }
-            else if(lane==1 && !no_lcr){  // if on middle lane, go back to right lane
-              lane = 2;
+            if(lane != 1){ // if we are not on the center lane.
+              if((lane == 0 && !car_right) || (lane == 2 && !car_left)){
+                lane = 1; // Back to center.
+              }
             }
             if(ref_vel < 49.5){
               speed_diff += 0.224;
