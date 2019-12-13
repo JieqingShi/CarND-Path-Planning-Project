@@ -140,7 +140,7 @@ int main() {
               // Getting information about car in front of us
               if(check_car_s > car_s && dist2othercar > 0){
                 id_car_ahead = car_id;
-                speed_car_ahead = check_speed * 2.24; //m/sec to mph
+                speed_car_ahead = check_speed; //m/sec to mph
                 dist_car_ahead = dist2othercar;
               }
             }
@@ -153,7 +153,7 @@ int main() {
           }
 
           // take actions
-          double speed_diff = 0;
+          double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
           if(car_ahead){
             if(!car_left && lane > 0){  //no car on left lane and we are on middle lane or right lane
               lane--;
@@ -162,7 +162,14 @@ int main() {
               lane++;
             }
             else {
-              speed_diff -= 0.224;  // slow down
+              double diff_speed_mps = ((target_speed/2.24) - speed_car_ahead);
+              double decel_mphps = diff_speed_mps*2.24*0.02;
+              if(decel_mphps > 0.224){
+                decel_mphps = 0.224;
+              }
+              std::cout<<"Speed difference in meters/sec = " << diff_speed_mps << "; need to slow down by " << decel_mphps << std::endl;
+              // speed_diff -= 0.224;  // slow down
+              speed_diff -= decel_mphps;
               // three alternatives
               // simple pid speed controller
               // use target and and fmin
