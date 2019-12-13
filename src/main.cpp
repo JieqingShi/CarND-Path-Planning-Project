@@ -174,6 +174,7 @@ int main() {
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
+            // maybe can be simplified as well?
             if(lane != 2){ // if we are not on the center lane.
               if((lane == 0 && !car_right)){
                 lane = 1; // Back to center.
