@@ -163,6 +163,10 @@ int main() {
             }
             else {
               speed_diff -= 0.224;  // slow down
+              // three alternatives
+              // simple pid speed controller
+              // use target and and fmin
+              // calc acceleration required to get to speed in front of us and limit max decel
             }
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
@@ -180,6 +184,8 @@ int main() {
               speed_diff += 0.224;
             }
           }
+
+          std::cout<<"Speed diff = "<<speed_diff<<std::endl;
           
           json msgJson;
 
@@ -198,7 +204,7 @@ int main() {
           double ref_x = car_x;
           double ref_y = car_y;
           double ref_yaw = car_yaw;
-          double ref_speed = -1.0;
+          // double ref_speed = -1.0;
 
           // if previous path almost empty, use state of car
           if(prev_size < 2){
@@ -213,7 +219,7 @@ int main() {
             ptsy.push_back(car_y);
 
             // add reference speed
-            ref_speed = car_speed;
+            // ref_speed = car_speed;
 
           }
 
@@ -233,9 +239,8 @@ int main() {
             ptsy.push_back(prev_ref_y);
             ptsy.push_back(ref_y);
 
-            ref_speed = distance(prev_ref_x, prev_ref_y, ref_x, ref_y) / 0.02;
+            // ref_speed = distance(prev_ref_x, prev_ref_y, ref_x, ref_y) / 0.02;  // in m/sec
           }
-          std::cout<<"Ref speed = "<<ref_speed<<std::endl;
 
           // create evenly spaced points e.g. 30m apart starting from the reference points (can be defined using variable int apart = 30)
           vector<double> next_wp0 = getXY(car_s+target_spacing*1, 2+4*lane, map_waypoints_s, map_waypoints_x, map_waypoints_y);
