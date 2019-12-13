@@ -120,6 +120,7 @@ int main() {
           
           vector<double> avg_speeds_lane;
           vector<int> num_cars_lane;
+          vector<int>::iterator it;
 
           // double avg_speed_lane0, avg_speed_lane1, avg_speed_lane2;
           // int num_cars_lane0, num_cars_lane1, num_cars_lane2;
@@ -178,34 +179,41 @@ int main() {
             }
           }
 
-          // Calculating average lane speeds
-          // avg_speed_lane0 = accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size(); 
-          // avg_speed_lane1 = accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size(); 
-          // avg_speed_lane2 = accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size();
-          avg_speeds_lane.push_back(accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/car_speeds_lane0.size());
-          avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/car_speeds_lane1.size());
-          avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/car_speeds_lane2.size());
-
           // Find number of cars on each lane 
-          // num_cars_lane0 = car_speeds_lane0.size();
-          // num_cars_lane1 = car_speeds_lane1.size();
-          // num_cars_lane2 = car_speeds_lane2.size();
           num_cars_lane.push_back(car_speeds_lane0.size());
           num_cars_lane.push_back(car_speeds_lane1.size());
           num_cars_lane.push_back(car_speeds_lane2.size());
 
-
+           // Calculating average lane speeds (first push the actual average)
+           avg_speeds_lane.push_back(accumulate(car_speeds_lane0.begin(), car_speeds_lane0.end(), 0.0)/num_cars_lane[0]);
+           avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/num_cars_lane[1]);
+           avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/num_cars_lane[2]);
+           
+           // ... if number of cars for that lane is 0, change value to default speed 1000
+           for(int i = 0; i<avg_speeds_lane.size(); i++){
+             if(num_cars_lane[i]==0){
+               avg_speeds_lane[i] = 1000;
+             }
+           }
 
           // DEBUGGING
-          std::cout << "  LEFT LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[0]
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane[0] << std::endl;
-          std::cout << "  MIDDLE LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[1]
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane[1] << std::endl;
-          std::cout << "  RIGHT LANE  " << std::setw(2)
-                    << "  avg Speed = " << std::setw(2) << avg_speeds_lane[2]
-                    << "  no. of cars = " << std::setw(2) << num_cars_lane[2] << std::endl;
+          // std::cout << "  LEFT LANE  " << std::setw(2)
+          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[0]
+          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[0] << std::endl;
+          // std::cout << "  MIDDLE LANE  " << std::setw(2)
+          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[1]
+          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[1] << std::endl;
+          // std::cout << "  RIGHT LANE  " << std::setw(2)
+          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[2]
+          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[2] << std::endl;
+
+          int lane_least_cars = std::distance(num_cars_lane.begin(), std::min_element(num_cars_lane.begin(), num_cars_lane.end()));
+          int lane_highest_avgspeed = std::distance(avg_speeds_lane.begin(), std::max_element(avg_speeds_lane.begin(), avg_speeds_lane.end()));
+
+          std::cout << " LANE WITH LEAST NO OF CARS  = " << std::setw(2)
+                    << lane_least_cars << std::setw(2) << " WITH NO. CARS = " << num_cars_lane[lane_least_cars] << std::endl;
+          std::cout << " LANE WITH HIGHEST AVG. SPEED  = " << std::setw(2)
+                    << lane_highest_avgspeed << std::setw(2) << " WITH AVG SPEED = " << avg_speeds_lane[lane_highest_avgspeed] << std::endl;
 
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
