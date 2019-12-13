@@ -126,13 +126,13 @@ int main() {
             double dist2othercar = check_car_s - car_s;
             int lane_other_car = -1;
             // find lanes of other cars
-            if(d>0 && d<=4){
+            if(d>0 && d<4){
               lane_other_car = 0;  // left lane
             }
-            else if(d>4 && d<=8){
+            else if(d>4 && d<8){
               lane_other_car = 1;  // middle lane
             }
-            else if(d>8 && d<=12){
+            else if(d>8 && d<12){
               lane_other_car = 2;  // right lane
             }
             // todo: add check for lane_other_car < 0 if initialized to -1
@@ -142,13 +142,16 @@ int main() {
           
           // setting flags
           if(lane == lane_other_car){  // if car is in same lane
-            car_ahead = car_ahead | (check_car_s > car_s && dist2othercar < safe_dist_front);
+            // car_ahead = car_ahead | (check_car_s > car_s && dist2othercar < safe_dist_front);
+            car_ahead |= check_car_s > car_s && check_car_s - car_s < safe_dist_front;
           }
           else if(lane-lane_other_car == 1){  // if car is on the left lane of us
-            car_left = car_left | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
+            // car_left = car_left | (dist2othercar < safe_dist_front && dist2othercar > safe_dist_back);
+            car_left |= car_s - safe_dist_front < check_car_s && car_s + safe_dist_front > check_car_s;
           }
           else if(lane-lane_other_car == -1){ // if car is on the right lane of us
-            car_right = car_right | (dist2othercar < safe_dist_front && dist2othercar < safe_dist_back);
+            // car_right = car_right | (dist2othercar < safe_dist_front && dist2othercar < safe_dist_back);
+            car_right |= car_s - safe_dist_front < check_car_s && car_s + safe_dist_front > check_car_s;
           }
         }
 
@@ -156,10 +159,10 @@ int main() {
           double speed_diff = 0;
           if(car_ahead){
             if(!car_left && lane > 0){  //no car on left lane and we are on middle lane or right lane
-              --lane;
+              lane--;
             }
             else if(!car_right && lane!=2){  //no car on right lane and we are on middle lane or left lane
-              ++lane;
+              lane++;
             }
             else {
               speed_diff -= 0.224;  // slow down
