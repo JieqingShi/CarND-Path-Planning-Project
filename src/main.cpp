@@ -106,7 +106,7 @@ int main() {
           }
 
           //DEBUG
-          if(car_s > max_s/2){
+          if(car_s > 3472.777){
             std::cout<<"HALF WAY DONE"<<std::endl;
           }
 
