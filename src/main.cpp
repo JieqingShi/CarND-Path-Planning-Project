@@ -265,12 +265,12 @@ int main() {
               prev_lane = 0;
               wait_counter++;
               std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2\r"<<std::flush;
-              if(wait_counter<50){
-                std::cout<<"Waiting for counter to reach 50, it is now at"<<wait_counter<<std::endl;
+              if(wait_counter<150){
+                std::cout<<"Waiting for counter to reach 50, it is now at"<<wait_counter<<std::flush;
                 skip_check = true;
               }
               else{
-                std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2"<<std::endl;
+                std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2\r"<<std::flush;
                 skip_check = false;
               }
             }
@@ -285,7 +285,7 @@ int main() {
             //   lane = target_lane;
             // }
             
-            // This sort of works??
+            // Same strategy as above but slightly waits in the middle lane;
             // if(lane!=target_lane){
             //   wait_counter++;
             //   if(wait_counter>25){          
