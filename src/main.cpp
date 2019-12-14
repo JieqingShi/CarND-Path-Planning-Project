@@ -217,11 +217,10 @@ int main() {
           int lane_highest_avgspeed = std::distance(avg_speeds_lane.begin(), std::max_element(avg_speeds_lane.begin(), avg_speeds_lane.end()));
           int target_lane = lane_highest_avgspeed;
 
-          std::cout << " LANE WITH LEAST NO OF CARS  = " << std::setw(2)
-                    << lane_least_cars << std::setw(2) << " WITH NO. CARS = " << num_cars_lane[lane_least_cars] << std::endl;
-          std::cout << " LANE WITH HIGHEST AVG. SPEED  = " << std::setw(2)
-                    << lane_highest_avgspeed << std::setw(2) << " WITH AVG SPEED = " << avg_speeds_lane[lane_highest_avgspeed] << std::endl;
-
+          if(abs(lane-target_lane)>1){
+            std::cout<<"PREPARING FOR DOUBLE LANE CHANGE FROM " << lane << " TO " << target_lane <<std::endl;
+          }
+          
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
           if(car_ahead){
@@ -267,9 +266,6 @@ int main() {
             
             // This sort of works??
             if(lane!=target_lane){
-              if(abs(lane-target_lane)>1){
-                std::cout<<"PREPARING FOR DOUBLE LANE CHANGE, PLEASE OBSERVE!"<<std::endl;
-              }
               wait_counter++;
               if(wait_counter>25){          
                 if(lane>target_lane && !car_left){
