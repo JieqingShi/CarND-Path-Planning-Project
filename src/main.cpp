@@ -259,9 +259,7 @@ int main() {
             // if(lane!=target_lane && !car_right && !car_left){
             //   lane = target_lane;
             // }
-            // if(target_speed < 49.5){
-            //   speed_diff += 0.224;
-            // }
+            
             if(lane!=target_lane){
               wait_counter++;
               std::cout<<"Waiting now for "<<wait_counter<<" iterations"<<std::endl;
@@ -275,6 +273,9 @@ int main() {
                 }
                 wait_counter = 0;
               }
+            }
+            if(target_speed < 49.5){
+              speed_diff += 0.224;
             }
             // int prev_lane = lane;
             // if(abs(prev_lane - target_lane)>1){
