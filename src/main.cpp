@@ -272,6 +272,7 @@ int main() {
               else{
                 std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2\r"<<std::flush;
                 skip_check = false;
+                wait_counter = 0;
               }
             }
             else if(lane == 1 && !car_right && !skip_check){
