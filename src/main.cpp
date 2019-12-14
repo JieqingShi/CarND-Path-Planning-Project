@@ -262,7 +262,7 @@ int main() {
             // if(target_speed < 49.5){
             //   speed_diff += 0.224;
             // }
-            while(lane!=target_lane){
+            if(lane!=target_lane){
               wait_counter++;
               std::cout<<"Waiting now for "<<wait_counter<<" iterations"<<std::endl;
               if(wait_counter>50){
