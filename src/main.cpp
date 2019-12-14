@@ -265,7 +265,7 @@ int main() {
               prev_lane = 0;
               wait_counter++;
               std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2\r"<<std::flush;
-              if(wait_counter<150){
+              if(wait_counter<100){
                 std::cout<<"Waiting for counter to reach 50, it is now at"<<wait_counter<<std::flush;
                 skip_check = true;
               }
@@ -273,6 +273,7 @@ int main() {
                 std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2\r"<<std::flush;
                 skip_check = false;
                 wait_counter = 0;
+                prev_lane = -1;
               }
             }
             else if(lane == 1 && !car_right && !skip_check){
