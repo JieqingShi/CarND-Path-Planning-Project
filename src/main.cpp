@@ -19,6 +19,7 @@ double target_speed = 0.0;
 double safe_dist = 25.0;
 double target_spacing = 35.0;
 int path_size = 50;
+int wait_counter = 0;
 
 int main() {
   uWS::Hub h;
@@ -147,8 +148,8 @@ int main() {
             }
 
             // Getting information about average lane speed and number of cars on each lane
-            // only interested in cars ahead of us within a distance of 100 meters
-            if(check_car_s > car_s && dist2othercar > 0 && dist2othercar <= 100){
+            // only interested in cars ahead of us within a distance of 70 meters
+            if(check_car_s > car_s && dist2othercar > 0 && dist2othercar <= 70){
               if(lane_other_car == 0){
                 car_speeds_lane0.push_back(check_speed);  // left lane
               }
@@ -243,6 +244,7 @@ int main() {
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
+            // "Keep right" strategy
             // todo: maybe can be simplified as well?
             // if(lane != 2){ // if we are not on the center lane.
             //   if((lane == 0 && !car_right)){
@@ -253,13 +255,42 @@ int main() {
             //   }
             // }
 
-            // set very simple target_lane based on highest avg_sped for first testing
-            if(lane!=target_lane && !car_right && !car_left){
-              lane = target_lane;
+            // "Simple highest avgSpeed strategy" -> lateral acceleration too high, leads to violations!
+            // if(lane!=target_lane && !car_right && !car_left){
+            //   lane = target_lane;
+            // }
+            // if(target_speed < 49.5){
+            //   speed_diff += 0.224;
+            // }
+            while(lane!=target_lane){
+              wait_counter++;
+              std::cout<<"Waiting now for "<<wait_counter<<" iterations"<<std::endl;
+              if(wait_counter>50){
+                std::cout<<"Preparing for lane switch from "<<lane<<" to "<<target_lane<<std::endl;            
+                if(lane>target_lane && !car_left){
+                  lane--;
+                }
+                else if(lane<target_lane && !car_right){
+                  lane++;
+                }
+                wait_counter = 0;
+              }
             }
-            if(target_speed < 49.5){
-              speed_diff += 0.224;
-            }
+            // int prev_lane = lane;
+            // if(abs(prev_lane - target_lane)>1){
+            //   wait_counter++;
+            //   if(wait_counter>50){
+            //     if(lane>target_lane){  //switch from 2 to 0
+            //       lane--;
+            //     }
+            //     else{
+            //       lane++;
+            //     }
+            //     wait_counter = 0;
+            //   }
+            // }
+
+            // todo: find strategy which incorporates punishment of non-adjacent lane changes (e.g. middle to right)
           }
           
           json msgJson;
