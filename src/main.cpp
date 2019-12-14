@@ -19,10 +19,7 @@ double target_speed = 0.0;
 double safe_dist = 25.0;
 double target_spacing = 35.0;
 int path_size = 50;
-int wait_counter = 0;
-bool print_halfway_flag = true;
-bool skip_check = false;
-int prev_lane = -1;
+int prev_half_of_track = -1;
 
 int main() {
   uWS::Hub h;
@@ -103,15 +100,17 @@ int main() {
           // the size of the previous path
           int prev_size = previous_path_x.size();
 
+          //DEBUG WHICH PART OF THE TRACK WE'RE IN
+          int half_of_track = (int(car_s)/3473) % 2;
+          if(prev_half_of_track!=half_of_track){
+            std::cout<<"WE'RE AT THE "<<half_of_track+1<<" PART OF THE TRACK"<<std::endl;
+            prev_half_of_track = half_of_track;
+          }
+          
+
           /* Collision avoidance */
           if(prev_size > 0){
             car_s = end_path_s;
-          }
-
-          //DEBUG
-          if(car_s > 3472.777 && print_halfway_flag){
-            std::cout<<"HALF WAY DONE"<<std::endl;
-            print_halfway_flag = false;
           }
 
           bool car_ahead = false;
@@ -250,42 +249,12 @@ int main() {
           else{
             // "Keep right" strategy
             // todo: maybe can be simplified as well?
-            // if(lane != 2){ // if we are not on the center lane.
-            //   if((lane == 0 && !car_right)){
-            //     lane = 1; // Back to center.
-            //   }
-            //   else if((lane==1 && !car_right)){
-            //     lane = 2;  // Back to right
-            //   }
-            // }
-
-            // Testing "advanced keep right" strategy
-            if((lane == 0 && !car_right) || (prev_lane == 0 && !car_right)){
-              lane = 1;
-              prev_lane = 0;
-              wait_counter++;
-              std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2\r"<<std::flush;
-              if(wait_counter<100){
-                std::cout<<"Waiting for counter to reach 50, it is now at"<<wait_counter<<std::flush;
-                skip_check = true;
-              }
-              else{
-                std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2\r"<<std::flush;
-                skip_check = false;
-                wait_counter = 0;
-                prev_lane = -1;
-              }
+            if((lane == 0 && !car_right)){
+              lane = 1; // Back to center.
             }
-            else if(lane == 1 && !car_right && !skip_check){
-              std::cout<<"SWITCHING LANES FROM 1 to 2"<<std::endl;
-              lane = 2;
-              skip_check = false;
+            else if((lane==1 && !car_right)){
+              lane = 2;  // Back to right
             }
-
-            // "Simple highest avgSpeed strategy" -> lateral acceleration too high, leads to violations!
-            // if(lane!=target_lane && !car_right && !car_left){
-            //   lane = target_lane;
-            // }
             
             // Same strategy as above but slightly waits in the middle lane;
             // if(lane!=target_lane){
@@ -469,3 +438,37 @@ int main() {
   
   h.run();
 }
+
+
+// Testing "advanced keep right" strategy -> kinda works but rarely happens
+            /*
+
+            // global variables which go at the beginning
+            int wait_counter = 0;
+            bool print_halfway_flag = true;
+            bool skip_check = false;
+            int prev_lane = -1;
+
+
+            if((lane == 0 && !car_right) || (prev_lane == 0 && !car_right)){
+              lane = 1;
+              prev_lane = 0;
+              wait_counter++;
+              std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2\r"<<std::flush;
+              if(wait_counter<100){
+                std::cout<<"Waiting for counter to reach 50, it is now at"<<wait_counter<<std::flush;
+                skip_check = true;
+              }
+              else{
+                std::cout<<"PREPARING NEXT LANE CHANGE FROM 1 to 2\r"<<std::flush;
+                skip_check = false;
+                wait_counter = 0;
+                prev_lane = -1;
+              }
+            }
+            else if(lane == 1 && !car_right && !skip_check){
+              std::cout<<"SWITCHING LANES FROM 1 to 2"<<std::endl;
+              lane = 2;
+              skip_check = false;
+            }
+            */
