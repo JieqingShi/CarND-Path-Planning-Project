@@ -221,10 +221,6 @@ int main() {
           int lane_highest_avgspeed = std::distance(avg_speeds_lane.begin(), std::max_element(avg_speeds_lane.begin(), avg_speeds_lane.end()));
           int target_lane = lane_highest_avgspeed;
 
-          if(abs(lane-target_lane)>1){
-            std::cout<<"PREPARING FOR DOUBLE LANE CHANGE FROM " << lane << " TO " << target_lane <<std::endl;
-          }
-
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
           if(car_ahead){
@@ -263,24 +259,21 @@ int main() {
             //   }
             // }
 
-            // Testing "advanced keep right" strategy
+            // Testing "advanced keep right" strategy > DOES NOT WORK
+            if((lane==1 && !car_right && !skip_check)){
+                lane = 2;  // Back to right
+            }
             if((lane == 0 && !car_right)){
               std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2"<<std::endl;
               prev_lane = lane;
               lane = 1; // Back to center.
               wait_counter++;
               std::cout<<"SWITCHING TO LANE 1"<<std::endl;
-              skip_check = true;
             }
             else if(prev_lane==0 && lane == 1 && !car_right && wait_counter > 100){
               lane = 2;
               wait_counter = 0;
               std::cout<<"... AND NOW SWITCHING TO LANE 2"<<std::endl;
-              skip_check = false;
-            }
-
-            else if((lane==1 && !car_right && !skip_check)){
-                lane = 2;  // Back to right
             }
 
             // "Simple highest avgSpeed strategy" -> lateral acceleration too high, leads to violations!
