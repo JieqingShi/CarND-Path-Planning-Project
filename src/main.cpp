@@ -260,16 +260,22 @@ int main() {
             //   lane = target_lane;
             // }
             
+            // This sort of works??
             if(lane!=target_lane){
+              if(abs(lane-target_lane)>1){
+                std::cout<<"PREPARING FOR DOUBLE LANE CHANGE, PLEASE OBSERVE!"<<std::endl;
+              }
               wait_counter++;
-              std::cout<<"Waiting now for "<<wait_counter<<" iterations"<<std::endl;
-              if(wait_counter>50){
-                std::cout<<"Preparing for lane switch from "<<lane<<" to "<<target_lane<<std::endl;            
+              if(wait_counter>25){          
                 if(lane>target_lane && !car_left){
+                  std::cout<<"CHANGING LANES FROM "<<lane;
                   lane--;
+                  std::cout<<" to "<<lane<<std::endl;
                 }
                 else if(lane<target_lane && !car_right){
+                  std::cout<<"CHANGING LANES FROM "<<lane;
                   lane++;
+                  std::cout<<" to "<<lane<<std::endl;
                 }
                 wait_counter = 0;
               }
