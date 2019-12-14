@@ -259,21 +259,17 @@ int main() {
             //   }
             // }
 
-            // Testing "advanced keep right" strategy > DOES NOT WORK
-            if((lane==1 && !car_right && !skip_check)){
-                lane = 2;  // Back to right
-            }
+            // Testing "advanced keep right" strategy
             if((lane == 0 && !car_right)){
               std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2"<<std::endl;
-              prev_lane = lane;
-              lane = 1; // Back to center.
-              wait_counter++;
-              std::cout<<"SWITCHING TO LANE 1"<<std::endl;
+              lane++;
+              for(int i=0; i<100; i++){
+                std::cout<<"Waiting for i to reach 100, now at "<<i<<std::endl;
+              }
+              lane++;
             }
-            else if(prev_lane==0 && lane == 1 && !car_right && wait_counter > 100){
+            else if(lane == 1 && !car_right){
               lane = 2;
-              wait_counter = 0;
-              std::cout<<"... AND NOW SWITCHING TO LANE 2"<<std::endl;
             }
 
             // "Simple highest avgSpeed strategy" -> lateral acceleration too high, leads to violations!
