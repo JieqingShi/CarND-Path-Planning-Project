@@ -105,6 +105,11 @@ int main() {
             car_s = end_path_s;
           }
 
+          //DEBUG
+          if(car_s > max_s/2){
+            std::cout<<"HALF WAY DONE"<<std::endl;
+          }
+
           bool car_ahead = false;
           bool car_left = false;
           bool car_right = false;
@@ -299,7 +304,7 @@ int main() {
 
             // todo: find strategy which incorporates punishment of non-adjacent lane changes (e.g. middle to right)
           }
-          
+
           json msgJson;
 
           vector<double> next_x_vals;
