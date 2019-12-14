@@ -220,7 +220,7 @@ int main() {
           if(abs(lane-target_lane)>1){
             std::cout<<"PREPARING FOR DOUBLE LANE CHANGE FROM " << lane << " TO " << target_lane <<std::endl;
           }
-          
+
           // take actions
           double speed_diff = 0;  // can only take on three values -0.224, 0 or + 0.224
           if(car_ahead){
@@ -267,7 +267,7 @@ int main() {
             // This sort of works??
             if(lane!=target_lane){
               wait_counter++;
-              if(wait_counter>25){          
+              if(wait_counter>100){          
                 if(lane>target_lane && !car_left){
                   std::cout<<"CHANGING LANES FROM "<<lane;
                   lane--;
@@ -439,22 +439,6 @@ int main() {
       }
     }  // end websocket if
   }); // end h.onMessage
-
-  // We don't need this since we're not using HTTP but if it's removed the
-  // program
-  // doesn't compile :-(
-    /*
-  h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data,
-                     size_t, size_t) {
-    const std::string s = "<h1>Hello world!</h1>";
-    if (req.getUrl().valueLength == 1) {
-      res->end(s.data(), s.length());
-    } else {
-      // i guess this should be done more gracefully?
-      res->end(nullptr, 0);
-    }
-  });
-  */
 
   h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
     std::cout << "Connected!!!" << std::endl;
