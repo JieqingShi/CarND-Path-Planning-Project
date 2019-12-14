@@ -20,6 +20,9 @@ double safe_dist = 25.0;
 double target_spacing = 35.0;
 int path_size = 50;
 int wait_counter = 0;
+bool print_halfway_flag = true;
+bool skip_check = false;
+int prev_lane = -1;
 
 int main() {
   uWS::Hub h;
@@ -106,8 +109,9 @@ int main() {
           }
 
           //DEBUG
-          if(car_s > 3472.777){
+          if(car_s > 3472.777 && print_halfway_flag){
             std::cout<<"HALF WAY DONE"<<std::endl;
+            print_halfway_flag = false;
           }
 
           bool car_ahead = false;
@@ -259,47 +263,53 @@ int main() {
             //   }
             // }
 
+            // Testing "advanced keep right" strategy
+            if((lane == 0 && !car_right)){
+              std::cout<<"PREPARING FOR LANE CHANGE FROM 0 to 2"<<std::endl;
+              prev_lane = lane;
+              lane = 1; // Back to center.
+              wait_counter++;
+              std::cout<<"SWITCHING TO LANE 1"<<std::endl;
+              skip_check = true;
+            }
+            else if(prev_lane==0 && lane == 1 && !car_right && wait_counter > 100){
+              lane = 2;
+              wait_counter = 0;
+              std::cout<<"... AND NOW SWITCHING TO LANE 2"<<std::endl;
+              skip_check = false;
+            }
+
+            else if((lane==1 && !car_right && !skip_check)){
+                lane = 2;  // Back to right
+            }
+
             // "Simple highest avgSpeed strategy" -> lateral acceleration too high, leads to violations!
             // if(lane!=target_lane && !car_right && !car_left){
             //   lane = target_lane;
             // }
             
             // This sort of works??
-            if(lane!=target_lane){
-              wait_counter++;
-              if(wait_counter>100){          
-                if(lane>target_lane && !car_left){
-                  std::cout<<"CHANGING LANES FROM "<<lane;
-                  lane--;
-                  std::cout<<" to "<<lane<<std::endl;
-                }
-                else if(lane<target_lane && !car_right){
-                  std::cout<<"CHANGING LANES FROM "<<lane;
-                  lane++;
-                  std::cout<<" to "<<lane<<std::endl;
-                }
-                wait_counter = 0;
-              }
-            }
-            if(target_speed < 49.5){
-              speed_diff += 0.224;
-            }
-            // int prev_lane = lane;
-            // if(abs(prev_lane - target_lane)>1){
+            // if(lane!=target_lane){
             //   wait_counter++;
-            //   if(wait_counter>50){
-            //     if(lane>target_lane){  //switch from 2 to 0
+            //   if(wait_counter>25){          
+            //     if(lane>target_lane && !car_left){
+            //       std::cout<<"CHANGING LANES FROM "<<lane;
             //       lane--;
+            //       std::cout<<" to "<<lane<<std::endl;
             //     }
-            //     else{
+            //     else if(lane<target_lane && !car_right){
+            //       std::cout<<"CHANGING LANES FROM "<<lane;
             //       lane++;
+            //       std::cout<<" to "<<lane<<std::endl;
             //     }
             //     wait_counter = 0;
             //   }
             // }
-
-            // todo: find strategy which incorporates punishment of non-adjacent lane changes (e.g. middle to right)
+            if(target_speed < 49.5){
+              speed_diff += 0.224;
+            }
           }
+          
 
           json msgJson;
 
