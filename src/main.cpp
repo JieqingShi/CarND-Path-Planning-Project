@@ -258,7 +258,7 @@ int main() {
           // set actions for free driving (aka no car in front)
           else{
             // Use "Keep right" strategy for the first half of the track
-            if(half_of_track < 0){  // don't use this for testing
+            if(half_of_track == 1){  // don't use this for testing
               if((lane == 0 && !car_right)){
                 lane = 1; // Back to center.
               }
@@ -267,7 +267,7 @@ int main() {
               }
             }
             
-            else if(half_of_track >= 0){
+            else if(half_of_track == 0){
               if(lane!=target_lane){
                 wait_counter++;
                 if(wait_counter>25){          
