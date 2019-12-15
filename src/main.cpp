@@ -244,14 +244,14 @@ int main() {
                 decel_mphps = 0.056;
               }
               // set max deceleration to prevent violations of jerk/acceleration
-              // else if(decel_mphps > 0.4){
-              //   decel_mphps = 0.4;
-              // }
-              // trying some collision avoidance tactic
-              else if(dist_car_ahead < 15){
-                decel_mphps = 0.448;
-
+              else if(decel_mphps > 0.4){
+                decel_mphps = 0.4;
               }
+              // trying some collision avoidance tactic
+              // else if(dist_car_ahead < 15){
+              //   decel_mphps = 0.448;
+
+              // }
               speed_diff -= decel_mphps;
             }
           }
