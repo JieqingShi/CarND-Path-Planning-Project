@@ -124,12 +124,15 @@ int main() {
           double speed_car_ahead = 0;
 
           // Defining variables for finding number of cars in each lane 100m ahead of us and for finding average speed
+          // todo: reduce the amount of vectors, some are unnecessary
           vector<double> car_speeds_lane0;
           vector<double> car_speeds_lane1;
           vector<double> car_speeds_lane2;
           
           vector<double> avg_speeds_lane;
           vector<int> num_cars_lane;
+          vector<int> dist_current_lane;
+          vector<double> cost_of_lane;
           vector<int>::iterator it;
 
           // double avg_speed_lane0, avg_speed_lane1, avg_speed_lane2;
@@ -199,24 +202,25 @@ int main() {
           avg_speeds_lane.push_back(accumulate(car_speeds_lane1.begin(), car_speeds_lane1.end(), 0.0)/num_cars_lane[1]);
           avg_speeds_lane.push_back(accumulate(car_speeds_lane2.begin(), car_speeds_lane2.end(), 0.0)/num_cars_lane[2]);
            
-          // ... if number of cars for that lane is 0, change value to default speed 1000
+          // ... if number of cars for that lane is 0, change value to default speed 50
           for(int i = 0; i<avg_speeds_lane.size(); i++){
             if(num_cars_lane[i]==0){
               avg_speeds_lane[i] = 50;
             }
+            // ... also calculate distance of each lane to current lane
+            int other_lane = i;
+            int dist2lane = abs(lane - other_lane);
+            dist_current_lane[i] = dist2lane;
+            // ... now calculate the cost of switching to lane (lane_distance * avg_speed)
+            cost_of_lane[i] = dist_current_lane[i] * avg_speeds_lane[i];
+            // DEBUGGING
+            std::cout<<"Cost of switching to lane "<<other_lane;
+            std::cout<<"\t distance to current lane = "<<dist_current_lane[i];
+            std::cout<<"\t avg speed of lane = "<<avg_speeds_lane[i];
+            std::cout<<"\t cost = "<<cost_of_lane[i]<<std::endl;
           }
 
-          // DEBUGGING
-          // std::cout << "  LEFT LANE  " << std::setw(2)
-          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[0]
-          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[0] << std::endl;
-          // std::cout << "  MIDDLE LANE  " << std::setw(2)
-          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[1]
-          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[1] << std::endl;
-          // std::cout << "  RIGHT LANE  " << std::setw(2)
-          //           << "  avg Speed = " << std::setw(2) << avg_speeds_lane[2]
-          //           << "  no. of cars = " << std::setw(2) << num_cars_lane[2] << std::endl;
-
+          // "Advanced lane changing strategy": cost for changing to a certain lane = distance of target lane to current lane * avg_speeds
           int lane_least_cars = std::distance(num_cars_lane.begin(), std::min_element(num_cars_lane.begin(), num_cars_lane.end()));
           int lane_highest_avgspeed = std::distance(avg_speeds_lane.begin(), std::max_element(avg_speeds_lane.begin(), avg_speeds_lane.end()));
           int target_lane = lane_highest_avgspeed;
@@ -240,15 +244,18 @@ int main() {
                 decel_mphps = 0.056;
               }
               // set max deceleration to prevent violations of jerk/acceleration
-              else if(decel_mphps > 0.4){
-                decel_mphps = 0.4;
+              // else if(decel_mphps > 0.4){
+              //   decel_mphps = 0.4;
+              // }
+              // trying some collision avoidance tactic
+              else if(dist_car_ahead < 15){
+                decel_mphps = 0.448;
+
               }
               speed_diff -= decel_mphps;
-
-              // todo: add collision avoidance: if distance to car in front < 10m; emergency braking (speed_diff -= 0.5) or something;
             }
           }
-          // set actions for free driving (aka no car in front) -> keep right as possible
+          // set actions for free driving (aka no car in front)
           else{
             // Use "Keep right" strategy for the first half of the track
             if(half_of_track == 0){
@@ -265,14 +272,10 @@ int main() {
                 wait_counter++;
                 if(wait_counter>25){          
                   if(lane>target_lane && !car_left){
-                    std::cout<<"CHANGING LANES FROM "<<lane;
                     lane--;
-                    std::cout<<" to "<<lane<<std::endl;
                   }
                   else if(lane<target_lane && !car_right){
-                    std::cout<<"CHANGING LANES FROM "<<lane;
                     lane++;
-                    std::cout<<" to "<<lane<<std::endl;
                   }
                   wait_counter = 0;
                 }
