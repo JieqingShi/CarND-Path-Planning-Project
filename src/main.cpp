@@ -20,6 +20,7 @@ double safe_dist = 25.0;
 double target_spacing = 35.0;
 int path_size = 50;
 int prev_half_of_track = -1;
+int wait_counter = 0;
 
 int main() {
   uWS::Hub h;
@@ -100,12 +101,12 @@ int main() {
           // the size of the previous path
           int prev_size = previous_path_x.size();
 
-          //DEBUG WHICH PART OF THE TRACK WE'RE IN
+          //DEBUG
           int half_of_track = (int(car_s)/3473) % 2;
-          if(prev_half_of_track!=half_of_track){
-            std::cout<<"WE'RE AT THE "<<half_of_track+1<<" PART OF THE TRACK"<<std::endl;
-            prev_half_of_track = half_of_track;
-          }
+            if(prev_half_of_track!=half_of_track){
+              std::cout<<"WE'RE AT THE "<<half_of_track+1<<" PART OF THE TRACK"<<std::endl;
+              prev_half_of_track = half_of_track;
+            }
           
 
           /* Collision avoidance */
@@ -243,36 +244,41 @@ int main() {
                 decel_mphps = 0.4;
               }
               speed_diff -= decel_mphps;
+
+              // todo: add collision avoidance: if distance to car in front < 10m; emergency braking (speed_diff -= 0.5) or something;
             }
           }
           // set actions for free driving (aka no car in front) -> keep right as possible
           else{
-            // "Keep right" strategy
-            // todo: maybe can be simplified as well?
-            if((lane == 0 && !car_right)){
-              lane = 1; // Back to center.
-            }
-            else if((lane==1 && !car_right)){
-              lane = 2;  // Back to right
+            // Use "Keep right" strategy for the first half of the track
+            if(half_of_track == 0){
+              if((lane == 0 && !car_right)){
+                lane = 1; // Back to center.
+              }
+              else if((lane==1 && !car_right)){
+                lane = 2;  // Back to right
+              }
             }
             
+            else if(half_of_track == 1){
+              if(lane!=target_lane){
+                wait_counter++;
+                if(wait_counter>25){          
+                  if(lane>target_lane && !car_left){
+                    std::cout<<"CHANGING LANES FROM "<<lane;
+                    lane--;
+                    std::cout<<" to "<<lane<<std::endl;
+                  }
+                  else if(lane<target_lane && !car_right){
+                    std::cout<<"CHANGING LANES FROM "<<lane;
+                    lane++;
+                    std::cout<<" to "<<lane<<std::endl;
+                  }
+                  wait_counter = 0;
+                }
+              }
+            }
             // Same strategy as above but slightly waits in the middle lane;
-            // if(lane!=target_lane){
-            //   wait_counter++;
-            //   if(wait_counter>25){          
-            //     if(lane>target_lane && !car_left){
-            //       std::cout<<"CHANGING LANES FROM "<<lane;
-            //       lane--;
-            //       std::cout<<" to "<<lane<<std::endl;
-            //     }
-            //     else if(lane<target_lane && !car_right){
-            //       std::cout<<"CHANGING LANES FROM "<<lane;
-            //       lane++;
-            //       std::cout<<" to "<<lane<<std::endl;
-            //     }
-            //     wait_counter = 0;
-            //   }
-            // }
             if(target_speed < 49.5){
               speed_diff += 0.224;
             }
